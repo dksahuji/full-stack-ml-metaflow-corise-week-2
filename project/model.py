@@ -36,12 +36,14 @@ class NbowModel():
 
     def fit(self, X, y):
         print(X.shape)
+        print(X[0])
         res = self.cv.fit_transform(X).toarray()
         self.model.fit(x=res, y=y, batch_size=32, 
                        epochs=10, validation_split=.2)
     
     def predict(self, X):
         print(X.shape)
+        print(X[0])
         res = self.cv.transform(X).toarray()
         return self.model.predict(res)
     

@@ -95,9 +95,9 @@ class BaselineChallenge(FlowSpec):
         self.results = []
         for params in self.hyperparam_set:
             model = NbowModel(**params) 
-            model.fit(X=self.traindf['review'], y=self.traindf['label'])
-            acc = model.eval_acc(X=self.valdf['review'], labels=self.valdf['label']) 
-            rocauc = model.eval_rocauc(X=self.valdf['review'], labels=self.valdf['label'])
+            model.fit(X=self.traindf['review'].values, y=self.traindf['label'])
+            acc = model.eval_acc(X=self.valdf['review'].values, labels=self.valdf['label']) 
+            rocauc = model.eval_rocauc(X=self.valdf['review'].values, labels=self.valdf['label'])
             self.results.append(ModelResult(f"NbowModel - vocab_sz: {params['vocab_sz']}", params, pathspec, acc, rocauc))
         self.next(self.aggregate)
 

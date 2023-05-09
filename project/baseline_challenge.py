@@ -3,8 +3,7 @@
 from metaflow import FlowSpec, step, Flow, current, Parameter, IncludeFile, card, current
 from metaflow.cards import Table, Markdown, Artifact, Image
 import numpy as np 
-from dataclasses import dataclass
-
+from dataclasses import dataclass, asdict
 labeling_function = lambda row: 1 if row['rating']>=4 else 0
 
 @dataclass
@@ -77,6 +76,11 @@ class BaselineChallenge(FlowSpec):
         rocauc = roc_auc_score(self.valdf['label'], predictions)
  
         self.result = ModelResult("Baseline", params, pathspec, acc, rocauc)
+        # pylint: disable=no-member
+        #self.result_serialized = ModelResult("Baseline", params, pathspec, acc, rocauc).as_json_str()
+        self.result_serialized = asdict(ModelResult("Baseline", params, pathspec, acc, rocauc))
+        # pylint: enable=no-member
+        
         self.next(self.aggregate)
 
     @step
@@ -93,12 +97,17 @@ class BaselineChallenge(FlowSpec):
         pathspec = f"{current.flow_name}/{current.run_id}/{current.step_name}/{current.task_id}"
 
         self.results = []
+        self.results_serialized = []
         for params in self.hyperparam_set:
             model = NbowModel(**params) 
             model.fit(X=self.traindf['review'].values, y=self.traindf['label'])
             acc = model.eval_acc(X=self.valdf['review'].values, labels=self.valdf['label']) 
             rocauc = model.eval_rocauc(X=self.valdf['review'].values, labels=self.valdf['label'])
             self.results.append(ModelResult(f"NbowModel - vocab_sz: {params['vocab_sz']}", params, pathspec, acc, rocauc))
+            # pylint: disable=no-member
+            #self.results_serialized.append(ModelResult(f"NbowModel - vocab_sz: {params['vocab_sz']}", params, pathspec, acc, rocauc).as_json_str())
+            self.results_serialized.append(asdict(ModelResult("Baseline", params, pathspec, acc, rocauc)))
+            # pylint: enable=no-member
         self.next(self.aggregate)
 
     @step

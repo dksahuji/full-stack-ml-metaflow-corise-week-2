@@ -7,14 +7,7 @@ from dataclasses import dataclass, asdict
 
 labeling_function = lambda row: 1 if row['rating']>=4 else 0
 
-@dataclass
-class ModelResult:
-    "A custom struct for storing model evaluation results."
-    name: None
-    params: None
-    pathspec: None
-    acc: None
-    rocauc: None
+from model import ModelResult
 
 class BaselineChallenge(FlowSpec):
 
@@ -77,7 +70,7 @@ class BaselineChallenge(FlowSpec):
         rocauc = roc_auc_score(self.valdf['label'], predictions)
  
         self.result = ModelResult("Baseline", params, pathspec, acc, rocauc)
-        self.result_serialized = asdict(ModelResult("Baseline", params, pathspec, acc, rocauc))
+        #self.result_serialized = asdict(ModelResult("Baseline", params, pathspec, acc, rocauc))
         
         self.next(self.aggregate)
 
@@ -102,7 +95,7 @@ class BaselineChallenge(FlowSpec):
             acc = model.eval_acc(X=self.valdf['review'].values, labels=self.valdf['label']) 
             rocauc = model.eval_rocauc(X=self.valdf['review'].values, labels=self.valdf['label'])
             self.results.append(ModelResult(f"NbowModel - vocab_sz: {params['vocab_sz']}", params, pathspec, acc, rocauc))
-            self.results_serialized.append(asdict(ModelResult(f"NbowModel - vocab_sz: {params['vocab_sz']}", params, pathspec, acc, rocauc)))
+            #self.results_serialized.append(asdict(ModelResult(f"NbowModel - vocab_sz: {params['vocab_sz']}", params, pathspec, acc, rocauc)))
         self.next(self.aggregate)
 
     @step

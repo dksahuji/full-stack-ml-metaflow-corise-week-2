@@ -9,6 +9,17 @@ from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.metrics import accuracy_score, roc_auc_score
 from sklearn.feature_extraction.text import CountVectorizer
 
+from dataclasses import dataclass, asdict
+
+@dataclass
+class ModelResult:
+    "A custom struct for storing model evaluation results."
+    name: None
+    params: None
+    pathspec: None
+    acc: None
+    rocauc: None
+
 class NbowModel():
     def __init__(self, vocab_sz):
 

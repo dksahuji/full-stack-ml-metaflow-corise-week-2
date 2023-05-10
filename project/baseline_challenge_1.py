@@ -5,17 +5,9 @@ from metaflow.cards import Table, Markdown, Artifact, Image
 import numpy as np 
 from dataclasses import dataclass, asdict
 
-
 labeling_function = lambda row: 1 if row['rating']>=4 else 0
 
-@dataclass
-class ModelResult:
-    "A custom struct for storing model evaluation results."
-    name: None
-    params: None
-    pathspec: None
-    acc: None
-    rocauc: None
+from model import ModelResult
 
 class BaselineChallenge(FlowSpec):
 
@@ -76,7 +68,7 @@ class BaselineChallenge(FlowSpec):
         rocauc = roc_auc_score(self.valdf['label'], predictions)
  
         self.result = ModelResult("Baseline", params, pathspec, acc, rocauc)
-        self.result_serialized = asdict(ModelResult("Baseline", params, pathspec, acc, rocauc))
+        #self.result_serialized = asdict(ModelResult("Baseline", params, pathspec, acc, rocauc))
         self.next(self.aggregate)
 
     @step
@@ -100,7 +92,7 @@ class BaselineChallenge(FlowSpec):
             acc = model.eval_acc(X=self.valdf['review'].values, labels=self.valdf['label']) 
             rocauc = model.eval_rocauc(X=self.valdf['review'].values, labels=self.valdf['label'])
             self.results.append(ModelResult(f"NbowModel - vocab_sz: {params['vocab_sz']}", params, pathspec, acc, rocauc))
-            self.results_serialized.append(asdict(ModelResult(f"NbowModel - vocab_sz: {params['vocab_sz']}", params, pathspec, acc, rocauc)))
+            #self.results_serialized.append(asdict(ModelResult(f"NbowModel - vocab_sz: {params['vocab_sz']}", params, pathspec, acc, rocauc)))
         self.next(self.aggregate)
 
     def add_one(self, rows, result, df):
@@ -132,15 +124,12 @@ class BaselineChallenge(FlowSpec):
         violin_plot_df = {'name': [], 'accuracy': []}
         for task in inputs:
             if task._name == "model": 
-                #self.results_serialized = []
                 for result in task.results:
                     print(result)
                     rows, violin_plot_df = self.add_one(rows, result, violin_plot_df)
-                    #self.results_serialized.append(result)
             elif task._name == "baseline":
                 print(task.result)
                 rows, violin_plot_df = self.add_one(rows, task.result, violin_plot_df)
-                #self.result_serialized = task['result_serialized']
             else:
                 raise ValueError("Unknown task._name type. Cannot parse results.")
             
@@ -161,7 +150,7 @@ class BaselineChallenge(FlowSpec):
         # TODO: Append the matplotlib fig to the card
         # Docs: https://docs.metaflow.org/metaflow/visualizing-results/easy-custom-reports-with-card-components#showing-plots
         current.card.append(Image.from_matplotlib(fig))
-        self.merge_artifacts(inputs, include=['result_serialized', 'results_serialized'])
+        #self.merge_artifacts(inputs, include=['result_serialized', 'results_serialized'])
         self.next(self.end)
 
     @step
